@@ -8,6 +8,7 @@
 
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
+#include <frc/kinematics/SwerveModuleState.h>
 
 #include <frc/geometry/Translation2d.h>
 #include <frc/geometry/Rotation2d.h>
@@ -33,7 +34,7 @@ using namespace ctre::phoenix6::hardware;
 using namespace rev;
 using namespace frc;
 
-class Swerve : frc2::SubsystemBase
+class Swerve : public frc2::SubsystemBase
 
 {
     public:
@@ -42,6 +43,9 @@ class Swerve : frc2::SubsystemBase
 
         /// @brief This is the current pose of the robot, as determined by odometry.Update
         Pose2d CurrentPose;
+
+        /// @brief Current states for swerve telemetry.
+        SwerveModuleState CurrentSwerveStates[4];
 
         // Used for FRC lib
 
@@ -80,7 +84,7 @@ class Swerve : frc2::SubsystemBase
 
         /// @brief Needed by odometry.
         /// @param desiredStates - input by the trajectory.
-        void setModuleStates(wpi::array<SwerveModuleState, 4> desiredStates);
+        void setModuleStates(std::array<SwerveModuleState, 4> desiredStates);
 
         /// @brief Method to set the wheens to the aboslute position.
         void Snap_Wheels_To_Absolute_Position();
@@ -164,17 +168,17 @@ class Swerve : frc2::SubsystemBase
 
         ctre::phoenix::sensors::CANCoder ANGLE_ABS_ENCODERS[4]
         {
-            FR_E_CAN_ID,
-            FL_E_CAN_ID,
-            RL_E_CAN_ID,
-            RR_E_CAN_ID,
+            FR_E_A_CAN_ID,
+            FL_E_A_CAN_ID,
+            RL_E_A_CAN_ID,
+            RR_E_A_CAN_ID,
         };
 
         ctre::phoenix::sensors::CANCoder DRIVER_ABS_ENCODERS[4]
         {
-            FR_E_CAN_ID,
-            FL_E_CAN_ID,
-            RL_E_CAN_ID,
-            RR_E_CAN_ID,
+            FR_E_M_CAN_ID,
+            FL_E_M_CAN_ID,
+            RL_E_M_CAN_ID,
+            RR_E_M_CAN_ID,
         };
 };

@@ -13,15 +13,12 @@ using namespace frc;
 /// @brief Called when the robot is started.
 void Robot::RobotInit()
 {
+    io.VisionInit();
+
     m_chooser.SetDefaultOption(kAuto_Do_Nothing,  kAuto_Do_Nothing);
     m_chooser.AddOption(kAuto_Move,               kAuto_Move);
 
     SmartDashboard::PutData("Auto Modes", &m_chooser);
-
-    // We need to run our vision program in a separate thread. If not, our robot
-    // program will not run.
-    std::thread visionThread(VisionThread);
-    visionThread.detach();
 }
 
 // This function is called every 20 ms, no matter the mode. Use
@@ -32,7 +29,8 @@ void Robot::RobotInit()
 //  LiveWindow and SmartDashboard integrated updating.
 void Robot::RobotPeriodic()
 { 
-    SWERVE.updateOdometry(SWERVE.navx.GetYaw());
+    // SWERVE.updateOdometry(SWERVE.navx.GetYaw());
+    io.Robot_Periodic();
 }
 
 // This autonomous (along with the chooser code above) shows how to select
@@ -50,7 +48,7 @@ void Robot::AutonomousInit()
     SWERVE.Snap_Wheels_To_Absolute_Position();
 
     // Choose the autonomous command
-    m_AutoCommandselected = m_chooser.GetSelected();
+    // m_AutoCommandselected = m_chooser.GetSelected();
 }
 
 void Robot::AutonomousPeriodic()
@@ -97,12 +95,21 @@ void Robot::TestPeriodic()
 
 void Robot::SimulationInit()
 {
+    // Set the wheels to absolute position
+    SWERVE.Snap_Wheels_To_Absolute_Position();
 
 }
 
 void Robot::SimulationPeriodic()
 {
+    O_CONTROLLER.Robot_Periodic();
+    D_CONTROLLER.Robot_Periodic();
 
+    // Run the subassembly periodic methods
+    INTAKE.Robot_Periodic();
+    CLIMB.Robot_Periodic();
+
+    SWERVE.updateOdometry(SWERVE.navx.GetYaw());
 }
 
 #ifndef RUNNING_FRC_TESTS

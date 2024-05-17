@@ -15,11 +15,17 @@
 #define RL_A_CAN_ID                              6
 #define RR_A_CAN_ID                              9
 
-// Swerve CAN IDs Encoders
-#define FR_E_CAN_ID                             41
-#define FL_E_CAN_ID                             43
-#define RL_E_CAN_ID                             40
-#define RR_E_CAN_ID                             42
+// Swerve CAN IDs Angle Encoders
+#define FR_E_A_CAN_ID                           41
+#define FL_E_A_CAN_ID                           43
+#define RL_E_A_CAN_ID                           40
+#define RR_E_A_CAN_ID                           42
+
+// Swerve CAN IDs Motor Encoders
+#define FR_E_M_CAN_ID                           51
+#define FL_E_M_CAN_ID                           53
+#define RL_E_M_CAN_ID                           50
+#define RR_E_M_CAN_ID                           52
 
 #define INTAKE_ACTUATION_CAN_ID                 20
 #define INTAKE_ROLLER_MOTOR_CAN_ID              21
@@ -124,19 +130,4 @@
 #define CLIMBER_DOWN_POWER                    -1.0
 
 // ### Autonomous Variables ###
-// Autonomous Move
-#define AUTO_DRIVE_FORWARD_SPEED              -0.4
-#define AUTO_DRIVE_FORWARD_TIME        2000 * 1000  // Two seconds
-
-// Autonomous place AMP and move
-#define AUTO_SCOOT_TO_AMP_SPEED                0.2
-#define AUTO_SCOOT_TO_AMP_TIME          800 * 1000
-
-#define AUTO_DRIVE_TO_AMP_SPEED                0.2
-#define AUTO_DRIVE_TO_AMP_TIME         1200 * 1000
-
-#define AUTO_PLACE_NOTE                        1.0
-#define AUTO_PLACE_NOTE_TIME           1200 * 1000
-
-#define AUTO_DRIVE_ACROSS_LINE_SPEED           0.2
-#define AUTO_DRIVE_ACROSS_LINE_TIME    1000 * 1000
+// might have macros here idk

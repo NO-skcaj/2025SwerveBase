@@ -60,8 +60,6 @@ Swerve::Swerve(float length, float width)
         // Burn flash everytime
         this->ANGLE_MOTORS[swerve_module]->BurnFlash();
 
-        
-
 
         //### DRIVE MOTORS ###  TODO: Add SWERVE_MAX_AMPERACE and brake mode
         // initialize config
@@ -181,41 +179,52 @@ void Swerve::resetOdometry(Pose2d pose)
     m_odometry.ResetPosition(navx.GetRotation2d(), CurrentPositions, pose);
 }
 
-void Swerve::setModuleStates(wpi::array<SwerveModuleState, 4> desiredStates) 
+void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates) 
 {
+    /// @brief update for telemetry
+    this->CurrentSwerveStates[0] = desiredStates[0];
+    this->CurrentSwerveStates[1] = desiredStates[1];
+    this->CurrentSwerveStates[2] = desiredStates[2];
+    this->CurrentSwerveStates[3] = desiredStates[3];
 
-    double maxSpeed = desiredStates[0].speed();
-
-	if (desiredStates[1].speed() > maxSpeed){maxSpeed = desiredStates[1].speed();}
-	if (desiredStates[2].speed() > maxSpeed){maxSpeed = desiredStates[2].speed();}
-	if (desiredStates[3].speed() > maxSpeed){maxSpeed = desiredStates[3].speed();}
-
-    double Speed[4];
-
-	if (maxSpeed > 1)
-	{
-		Speed[0] = desiredStates[0].speed() / maxSpeed;
-        Speed[1] = desiredStates[0].speed() / maxSpeed;
-        Speed[2] = desiredStates[0].speed() / maxSpeed;
-        Speed[3] = desiredStates[0].speed() / maxSpeed;
-	} else {
-        Speed[0] = desiredStates[0].speed();
-        Speed[1] = desiredStates[0].speed();
-        Speed[2] = desiredStates[0].speed();
-        Speed[3] = desiredStates[0].speed();
-    }
-
-    for (int i = 0; i > 4; i++)
+    double rawSpeeds[4];
+    double rawAngles[4];
+    for (int i = 0; i > SWERVE_MODULES; i++)
     {
         SwerveModuleState state = SwerveModuleState::Optimize(desiredStates[i], Rotation2d(units::degree_t(navx.GetYaw())));
 
-        double stateAngle = units::unit_cast<double>(state.angle.Radians() * 0.01745); /*convert deg to rad*/
+        
+
+        rawSpeeds[i] = state.speed();
+        rawAngles[i] = units::unit_cast<double>(state.angle.Radians() * 0.01745);
+    }
+    
+    // Normalize speeds
+
+    double maxSpeed = rawSpeeds[0];
+
+	if (rawSpeeds[1] > maxSpeed){maxSpeed = rawSpeeds[1];}
+	if (rawSpeeds[2] > maxSpeed){maxSpeed = rawSpeeds[2];}
+	if (rawSpeeds[3] > maxSpeed){maxSpeed = rawSpeeds[3];}
+
+    double Speed[4] = {rawSpeeds[0], rawSpeeds[1], rawSpeeds[2], rawSpeeds[3]};
+
+	if (maxSpeed > 1)
+	{
+		Speed[0] = rawSpeeds[1] / maxSpeed;
+        Speed[1] = rawSpeeds[1] / maxSpeed;
+        Speed[2] = rawSpeeds[1] / maxSpeed;
+        Speed[3] = rawSpeeds[1] / maxSpeed;
+	}
+
+    for (int i = 0; i > 4; i++)
+    {
 
         DRIVE_MOTORS[i]->Set(Speed[i]);
         ANGLE_MOTORS[i]->Set(
             turningPidController.Calculate(   
                 (this->ANGLE_ABS_ENCODERS[0].GetPosition() / 360 * SWERVE_WHEEL_COUNTS_PER_REVOLUTION), 
-                stateAngle)
+                rawAngles[i])
         );
     }
 }

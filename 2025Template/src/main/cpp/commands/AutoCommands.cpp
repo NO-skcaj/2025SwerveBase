@@ -11,12 +11,17 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Pose2d.h>
 
+#include <frc/controller/PIDController.h>
+
 #include <frc2/command/SwerveControllerCommand.h>
 #include <frc2/command/SequentialCommandGroup.h>
 #include <frc2/command/ProfiledPIDCommand.h>
+#include <frc2/command/SubsystemBase.h>
 #include <frc2/command/InstantCommand.h>
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
 
-#include <frc/controller/PIDController.h>
+#include <frc2/command/Requirements.h>
 
 // I know I have too many of these, but at this point im done
 #include <units/velocity.h>
@@ -36,13 +41,7 @@ using namespace frc2;
 /// @brief Constructor for the AutoCommands class.
 /// @param swerve - Pointer to the robot swerve subsystem.
 /// @param intake - Pointer to the robot intake subsystem.
-AutoCommands::AutoCommands(Swerve *swerve, Intake *intake)
-{
-    // Remember the swerve and intake subsystem pointers
-    m_swerve = swerve;
-    m_intake = intake;
-}
-
+AutoCommands::AutoCommands(){}
 
 /// @brief This function does something *SPECIAL*. This basically creates the all of the commands for the auto. 
 // Basically, it creates a trajectory then processes that into a Swerve Controller Command which then can be
@@ -50,58 +49,71 @@ AutoCommands::AutoCommands(Swerve *swerve, Intake *intake)
 // of commands that get run. So you could bascially just put in any random command, function, or method that you want.
 // This allows for a very large array of options that you can have for this. 
 // As an example you could put in commands to raise, lower, and fire your launcher to score points in between commands to fire.
-// SequentialCommandGroup AutoCommands::getAutonomousCommand() {
+/// @param swerve - swerve to use for all this
+/// @param intake - not used but i might be after a sec of dev time
+frc2::CommandPtr AutoCommands::getAutonomousCommand(Swerve *swerve, Intake *intake) 
+{
 
-//     // 1. Create trajectory settings
-//     TrajectoryConfig trajectoryConfig{
-//         units::meters_per_second_t        {MAX_SPEED_MPS},
-//         units::meters_per_second_squared_t{MAX_ACCELERATION_MPS},
-//     }; //.setKinematics(this->m_swerve->m_driveKinematics);
+  // Set up config for trajectory
+  frc::TrajectoryConfig config(
+    units::meters_per_second_t        {MAX_SPEED_MPS},
+    units::meters_per_second_squared_t{MAX_ACCELERATION_MPS}
+  );
+  // Add kinematics to ensure max speed is actually obeyed
+  config.SetKinematics(swerve->m_driveKinematics);
 
-//     // 2. Generate example trajectory
-//     // in the future when we can actually have real autos we can use input
-//     // from the driver station to determine what this would be.
-//     Trajectory trajectory;
-//     trajectory = TrajectoryGenerator::GenerateTrajectory(
-//         Pose2d{0_m, 0_m, 0_deg},
-//         { // midpoints
-//             Translation2d(1_m, 0_m),
-//             Translation2d(1_m, -1_m),
-//         },
-//         Pose2d(2_m, -1_m, Rotation2d(180_deg)), // end point
-//         trajectoryConfig
-//     );
+  // An example trajectory to follow.  All units in meters.
+  auto exampleTrajectory = frc::TrajectoryGenerator::GenerateTrajectory(
+    frc::Pose2d{0_m, 0_m, 0_deg},
+    {frc::Translation2d{1_m, 1_m}, frc::Translation2d{2_m, -1_m}},
+    frc::Pose2d{3_m, 0_m, 0_deg},
+    config
+  );
 
-//     // How does this work? What is a trapezoid? I have no idea, I failed geometry.
-//     TrapezoidProfile<units::radians>::Constraints thetaConstraints{
-//         90_rad_per_s,
-//         45_rad_per_s / 1_s,
-//     };
-    
-//     // 3. Define PID controllers for tracking trajectory
-//     PIDController xController(SWERVE_P, SWERVE_I, SWERVE_D);
-//     PIDController yController(SWERVE_P, SWERVE_I, SWERVE_D);
-//     ProfiledPIDController<units::radians> thetaController{ANGLES_SWERVE_P, ANGLES_SWERVE_I, ANGLES_SWERVE_D, thetaConstraints};
+  TrapezoidProfile<units::radians>::Constraints thetaConstraints{
+    units::radians_per_second_t(90),
+    units::radians_per_second_squared_t(45),
+  };
 
-//     thetaController.EnableContinuousInput(units::meter_t(-3.14159), units::meter_t(3.14159)); // again this is just pi idc enough to const
+  frc::ProfiledPIDController<units::radians> thetaController{
+    ANGLES_SWERVE_P, ANGLES_SWERVE_I, ANGLES_SWERVE_D, 
+    thetaConstraints
+  };
 
-//     // 4. Construct command to follow trajectory
-//     SwerveControllerCommand<4> swerveControllerCommand(
-//         trajectory,
-//         [this]() -> Pose2d {return this->m_swerve->m_odometry.GetPose();},
-//         this->m_swerve->m_driveKinematics,
-//         xController,
-//         yController,
-//         thetaController,
-//         [this](wpi::array<SwerveModuleState, 4> desiredStates) -> void {this->m_swerve->setModuleStates(desiredStates);},
-//         {this->m_swerve}.ToPtr()
-//     ).ToPtr();
+  thetaController.EnableContinuousInput(
+    units::radian_t{-std::numbers::pi},
+    units::radian_t{std::numbers::pi}
+  );
 
-//     cmd::Sequence CommandListsss(
-//         InstantCommand( [this, initialPose = trajectory.InitialPose()]() {m_swerve->resetOdometry(initialPose);},{}).ToPtr(),
-//         swerveControllerCommand,
-//         InstantCommand([this] { m_swerve->Drive(0, 0, 0, this->m_swerve->navx.GetYaw()); }, {}).ToPtr()
-//     );
+  frc2::CommandPtr swerveControllerCommand = frc2::SwerveControllerCommand<4>(
+    exampleTrajectory, [swerve]() { return swerve->m_odometry.GetPose(); },
 
-//     return CommandListsss;
-// }
+    swerve->m_driveKinematics,
+
+    frc::PIDController{SWERVE_P, SWERVE_I, SWERVE_D},
+    frc::PIDController{SWERVE_P, SWERVE_I, SWERVE_D},
+    thetaController,
+
+    [swerve](auto moduleStates) {swerve->setModuleStates(moduleStates); },
+
+    {swerve}
+  ).ToPtr();
+
+  // Reset odometry to the initial pose of the trajectory, run path following
+  // command, then stop at the end.
+  auto seqeeenz = frc2::cmd::Sequence (
+    frc2::InstantCommand(
+      [swerve, initialPose = exampleTrajectory.InitialPose()]() {
+      swerve->resetOdometry(initialPose);
+      },{}
+    ).ToPtr(),
+
+    std::move(swerveControllerCommand),
+
+    frc2::InstantCommand(
+      [swerve] { swerve->Drive(0, 0, 0); }, {}
+    ).ToPtr()
+  );
+
+  return seqeeenz;
+}
