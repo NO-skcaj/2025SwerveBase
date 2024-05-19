@@ -2,7 +2,7 @@
 
 #include "../Constants.hpp"
 
-#include "AHRS.h"
+#include "AHRS.h" 
 
 #include <frc2/command/SubsystemBase.h>
 
@@ -92,7 +92,14 @@ class Swerve : public frc2::SubsystemBase
         /// @brief Method to "x" the wheels, prevents the robot from moving. 
         void Toggle_X_Wheels();
 
+        /// @brief ahhhhhhhhhhhhhhhhhhhhhhhhhhhhhh why didnt i just make this public??
+        bool Get_X_Wheels();
+
+        /// @brief Toggle SONIC MODE
 	    void Toggle_Fast_Wheels();
+
+        /// @brief litterally could've just made this a public variable
+        bool Get_Fast_Wheels();
 
         /// @brief Create an attitude and heading reference system (AHRS).
         AHRS navx{frc::SerialPort::SerialPort::Port::kMXP};
@@ -104,11 +111,11 @@ class Swerve : public frc2::SubsystemBase
         /// @brief sets it to default init
         void resetOdometry(Pose2d pose);
 
+
+        // this could've been in private
         // convert inches to meters for special princess WPIlib Swerve Kinematics
-        
         units::meter_t LENGTH = 0.381000762_m;
         units::meter_t WIDTH  = 0.381000762_m;
-
         // Locations for the swerve drive modules relative to the robot center.
         frc::Translation2d m_frontLeftLocation{LENGTH, WIDTH};
         frc::Translation2d m_frontRightLocation{LENGTH, -WIDTH};
@@ -174,11 +181,11 @@ class Swerve : public frc2::SubsystemBase
             RR_E_A_CAN_ID,
         };
 
-        ctre::phoenix::sensors::CANCoder DRIVER_ABS_ENCODERS[4]
-        {
-            FR_E_M_CAN_ID,
-            FL_E_M_CAN_ID,
-            RL_E_M_CAN_ID,
-            RR_E_M_CAN_ID,
-        };
+        // ctre::phoenix::sensors::CANCoder DRIVER_ABS_ENCODERS[4]
+        // {
+        //     FR_E_M_CAN_ID,
+        //     FL_E_M_CAN_ID,
+        //     RL_E_M_CAN_ID,
+        //     RR_E_M_CAN_ID,
+        // };
 };

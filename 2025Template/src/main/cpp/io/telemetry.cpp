@@ -1,7 +1,12 @@
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/smartdashboard/SendableChooser.h>
+
 #include <frc/shuffleboard/Shuffleboard.h>
 #include <frc/shuffleboard/ShuffleboardTab.h>
 #include <frc/shuffleboard/SimpleWidget.h>
+
+#include <wpi/sendable/Sendable.h>
+#include <wpi/sendable/SendableBuilder.h>
 
 #include <networktables/GenericEntry.h>
 #include <networktables/StructTopic.h>
@@ -12,6 +17,7 @@
 #include <thread>
 
 #include "../../include/io/Telemetry.hpp"
+#include "../../include/io/TelemetryTypes.hpp"
 
 using namespace nt;
 
@@ -22,9 +28,24 @@ Telemetry::Telemetry(Swerve *swerve)
     // Remember the swerve pointer
     this->m_swerve = swerve;
 
-    // this->posePublisher.Set(this->m_swerve->m_odometry.GetPose());
+    m_chooser.SetDefaultOption(kAuto_Do_Nothing,  kAuto_Do_Nothing);
+    m_chooser.AddOption(kAuto_Move,               kAuto_Move);
+    m_chooser.AddOption(kAuto_Do_Nothing,         kAuto_Do_Nothing);
 
-    // this->swervePublisher.Set(std::span<frc::SwerveModuleState>(this->m_swerve->CurrentSwerveStates));
+    SmartDashboard::PutData("Auto Modes", &m_chooser);
+    
+    // DEFENK
+    SmartDashboard::PutBoolean("XWHEELS? ", this->m_swerve->Get_Fast_Wheels());
+
+    // SONIC???
+    SmartDashboard::PutBoolean("Sonic Mode??? ", this->m_swerve->Get_Fast_Wheels());
+    
+    // Direction the robot is facing
+    SmartDashboard::PutNumber("Driver Angle: ", this->m_swerve->navx.GetYaw());
+
+    SwerveSendable swerveData(this->m_swerve);
+
+    SmartDashboard::PutData("Swerve Drive", (wpi::Sendable*)&swerveData);
     
     // We need to run our vision in a separate thread for it still run. 
     // The actual function is nested inside the function, thread is being defined.
@@ -73,12 +94,22 @@ void Telemetry::VisionInit()
 // @brief Method called periodically
 void Telemetry::Robot_Periodic()
 {
-    // update the heading
-    // heading.SetFloat(this->m_swerve->navx.GetYaw());
+    // DEFENK
+    SmartDashboard::PutBoolean("XWHEELS? ", this->m_swerve->Get_Fast_Wheels());
+
+    // SONIC???
+    SmartDashboard::PutBoolean("Sonic Mode??? ", this->m_swerve->Get_Fast_Wheels());
+    
+    // Direction the robot is facing
+    SmartDashboard::PutNumber("Driver Angle: ", this->m_swerve->navx.GetYaw());
+
+    SwerveModuleState states[4] =  {this->m_swerve->CurrentSwerveStates[0], this->m_swerve->CurrentSwerveStates[1], this->m_swerve->CurrentSwerveStates[2], this->m_swerve->CurrentSwerveStates[3]};
+    publisher.Set(states);
 
     // update position
     // this->posePublisher.Set(this->m_swerve->m_odometry.GetPose());
 
-    // update swerve states
-    // this->swervePublisher.Set(std::span<frc::SwerveModuleState>(this->m_swerve->CurrentSwerveStates));
+    SwerveSendable swerveData(this->m_swerve);
+
+    SmartDashboard::PutData("Swerve Drive", (wpi::Sendable*)&swerveData);
 }

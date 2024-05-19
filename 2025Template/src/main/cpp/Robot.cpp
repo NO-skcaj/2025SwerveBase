@@ -14,11 +14,6 @@ using namespace frc;
 void Robot::RobotInit()
 {
     io.VisionInit();
-
-    m_chooser.SetDefaultOption(kAuto_Do_Nothing,  kAuto_Do_Nothing);
-    m_chooser.AddOption(kAuto_Move,               kAuto_Move);
-
-    SmartDashboard::PutData("Auto Modes", &m_chooser);
 }
 
 // This function is called every 20 ms, no matter the mode. Use
@@ -46,9 +41,6 @@ void Robot::AutonomousInit()
 {
     // Set the wheels to absolute position
     SWERVE.Snap_Wheels_To_Absolute_Position();
-
-    // Choose the autonomous command
-    // m_AutoCommandselected = m_chooser.GetSelected();
 }
 
 void Robot::AutonomousPeriodic()
@@ -70,7 +62,6 @@ void Robot::TeleopPeriodic()
 
     // Run the subassembly periodic methods
     INTAKE.Robot_Periodic();
-    CLIMB.Robot_Periodic();
 }
 
 void Robot::DisabledInit()
@@ -98,6 +89,8 @@ void Robot::SimulationInit()
     // Set the wheels to absolute position
     SWERVE.Snap_Wheels_To_Absolute_Position();
 
+    io.VisionInit();
+
 }
 
 void Robot::SimulationPeriodic()
@@ -107,9 +100,10 @@ void Robot::SimulationPeriodic()
 
     // Run the subassembly periodic methods
     INTAKE.Robot_Periodic();
-    CLIMB.Robot_Periodic();
 
     SWERVE.updateOdometry(SWERVE.navx.GetYaw());
+
+    io.Robot_Periodic();
 }
 
 #ifndef RUNNING_FRC_TESTS

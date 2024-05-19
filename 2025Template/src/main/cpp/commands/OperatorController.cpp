@@ -4,12 +4,10 @@
 
 /// @brief Constructor for the OperatorController class.
 /// @param intake - Pointer to the intake class to allow calling intake methods.
-/// @param climb - Pointer to the climb class to allow calling climb methods.
-OperatorController::OperatorController(Intake *intake, Climb *climb)
+OperatorController::OperatorController(Intake *intake)
 {
     // Remember the method parameters
     m_intake = intake;
-    m_climb  = climb;
 }
 
 /// @brief Method called periodically every dirver/operator control packet.
@@ -60,26 +58,4 @@ void OperatorController::Robot_Periodic()
     // Flip the intake
     if (m_operator_joystick.GetRawButtonPressed(JOYSTICK_BUTTON_X))
         m_intake->Flip_Retraction();
-        
-    // Climb control Right
-    if (m_operator_joystick.GetRawButton(JOYSTICK_BUMPER_RIGHT))
-        m_climb->Set_Motor_Output(CLIMBER_MOTOR_RIGHT, CLIMBER_UP_POWER);  // Extend
-    else if (m_operator_joystick.GetRawAxis(RIGHT_TRIGGER_AXIS) > TRIGGER_THRESHOLD_VALUE)
-       m_climb->Set_Motor_Output(CLIMBER_MOTOR_RIGHT, CLIMBER_DOWN_POWER);  // Retract
-    else
-        m_climb->Set_Motor_Output(CLIMBER_MOTOR_RIGHT, 0.0);  // Stop
-        
-    // Climb control Left
-    if (m_operator_joystick.GetRawButton(JOYSTICK_BUMPER_LEFT))
-        m_climb->Set_Motor_Output(CLIMBER_MOTOR_LEFT, CLIMBER_UP_POWER);  // Extend
-    else if (m_operator_joystick.GetRawAxis(LEFT_TRIGGER_AXIS) > TRIGGER_THRESHOLD_VALUE)
-       m_climb->Set_Motor_Output(CLIMBER_MOTOR_LEFT, CLIMBER_DOWN_POWER);  // Retract
-    else
-        m_climb->Set_Motor_Output(CLIMBER_MOTOR_LEFT, 0.0);  // Stop
-
-    // Check for climber enable or disable.
-    if (m_operator_joystick.GetPOV() == JOYSTICK_POV_90)
-        m_climb->Enable_Climber_Motors(true);   // Enable the climber motors
-    else if (m_operator_joystick.GetPOV() == JOYSTICK_POV_270) 
-        m_climb->Enable_Climber_Motors(false); // Disable the climber motors
 }

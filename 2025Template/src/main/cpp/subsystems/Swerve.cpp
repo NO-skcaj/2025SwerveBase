@@ -1,11 +1,10 @@
 #include <iostream>
 
-#include <frc/smartdashboard/SmartDashboard.h>
-
 #include <frc/kinematics/SwerveModuleState.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/kinematics/SwerveModulePosition.h>
+#include <frc/kinematics/ChassisSpeeds.h>
 
 #include <frc/controller/PIDController.h>
 
@@ -86,6 +85,18 @@ Swerve::Swerve(float length, float width)
 /// @param gyro - The robot gyro heading.
 void Swerve::Drive(float ry, float rx, float rx2)
 {
+    if (this->x_wheels)
+    {
+        for (int swerve_module = 0; swerve_module < SWERVE_MODULES; swerve_module++)
+           this->DRIVE_MOTORS[swerve_module]->Set(0);
+    
+        // Initialize the PID controllers
+        this->PID_CONTROLLERS[0]->SetReference(-7.875, CANSparkMax::ControlType::kPosition);
+        this->PID_CONTROLLERS[1]->SetReference( 7.875, CANSparkMax::ControlType::kPosition);
+        this->PID_CONTROLLERS[2]->SetReference( 2.625, CANSparkMax::ControlType::kPosition);
+        this->PID_CONTROLLERS[3]->SetReference(-2.625, CANSparkMax::ControlType::kPosition);
+        return;
+    }
 
     // Correct/Sanitize our inputs
     deadzone_correction(&rx, &ry, &rx2);
@@ -93,31 +104,16 @@ void Swerve::Drive(float ry, float rx, float rx2)
     // Enter Swerve kinematics
     // This also acts as a periodic (only during teleop) so dont initialize anything here
 
-    units::meters_per_second_t  x      {rx * MAX_SPEED_MPS};
-    units::meters_per_second_t  y      {ry * MAX_SPEED_MPS};
-    units::radians_per_second_t x2     {rx2 * MAX_TURNING_RPS};
+    units::meters_per_second_t  x {rx * MAX_SPEED_MPS};
+    units::meters_per_second_t  y {ry * MAX_SPEED_MPS};
+    units::radians_per_second_t x2{rx2 * MAX_TURNING_RPS};
 
-    ChassisSpeeds chassisSpeeds = ChassisSpeeds::FromFieldRelativeSpeeds(x, y, x2, navx.GetRotation2d());
     // use this is you want to have robo centric 
     //chassisSpeeds = ChassisSpeeds(x, y, x2);
     // 5. Convert chassis speeds to individual module states
-    auto wModuleStates = m_driveKinematics.ToSwerveModuleStates(chassisSpeeds);
+    wpi::array<SwerveModuleState, 4> wModuleStates = m_driveKinematics.ToSwerveModuleStates(ChassisSpeeds::FromFieldRelativeSpeeds(x, y, x2, navx.GetRotation2d()));
 
     setModuleStates(wModuleStates);
-
-    SmartDashboard::PutNumber("Driver Angle: ", units::unit_cast<double>(navx.GetRotation2d().Degrees()));
-
-    // SmartDashboard::PutNumber("Drive 0: ",    SwerveMovement[0][0]);
-    // SmartDashboard::PutNumber("Position 0: ", SwerveMovement[0][1]);
-
-    // SmartDashboard::PutNumber("Drive 1: ",    SwerveMovement[1][0]);
-    // SmartDashboard::PutNumber("Position 1: ", SwerveMovement[1][1]);
-
-    // SmartDashboard::PutNumber("Drive 2: ",    SwerveMovement[2][0]);
-    // SmartDashboard::PutNumber("Position 2: ", SwerveMovement[2][1]);
-
-    // SmartDashboard::PutNumber("Drive 3: ",    SwerveMovement[3][0]);
-    // SmartDashboard::PutNumber("Position 3: ", SwerveMovement[3][1]);
 }
 
 // a REAL periodic
@@ -193,8 +189,6 @@ void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates)
     {
         SwerveModuleState state = SwerveModuleState::Optimize(desiredStates[i], Rotation2d(units::degree_t(navx.GetYaw())));
 
-        
-
         rawSpeeds[i] = state.speed();
         rawAngles[i] = units::unit_cast<double>(state.angle.Radians() * 0.01745);
     }
@@ -219,13 +213,8 @@ void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates)
 
     for (int i = 0; i > 4; i++)
     {
-
-        DRIVE_MOTORS[i]->Set(Speed[i]);
-        ANGLE_MOTORS[i]->Set(
-            turningPidController.Calculate(   
-                (this->ANGLE_ABS_ENCODERS[0].GetPosition() / 360 * SWERVE_WHEEL_COUNTS_PER_REVOLUTION), 
-                rawAngles[i])
-        );
+        this->DRIVE_MOTORS[i]->Set(Speed[i]);
+        this->PID_CONTROLLERS[i]->SetReference(rawAngles[i], CANSparkMax::ControlType::kPosition);
     }
 }
 
@@ -263,17 +252,22 @@ void Swerve::Snap_Wheels_To_Absolute_Position()
 void Swerve::Toggle_X_Wheels()
 {
     this->x_wheels = !this->x_wheels;
+}
 
-    SmartDashboard::PutBoolean("XWHEELS? ", this->x_wheels);
+bool Swerve::Get_X_Wheels()
+{
+    return this->x_wheels;
 }
 
 void Swerve::Toggle_Fast_Wheels() 
 {
     this->fast_wheels = !this->fast_wheels;
-    
-    SmartDashboard::PutBoolean("Sonic Mode??? ", this->fast_wheels);
 }
 
+bool Swerve::Get_Fast_Wheels()
+{
+    return this->fast_wheels;
+}
 /// @brief Method to create dead zones for the controller joysticks.
 /// @param x - Pointer to the x stick value to return the value used.
 /// @param y - Pointer to the y stick value to return the value used.

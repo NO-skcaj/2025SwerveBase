@@ -17,7 +17,7 @@
 #include "../include/commands/DriverController.hpp"
 #include "../include/commands/AutoCommands.hpp"
 
-#include "../include/io/telemetry.hpp"
+#include "../include/io/Telemetry.hpp"
 
 
 
@@ -41,10 +41,8 @@ class Robot : public frc::TimedRobot
         // Robot subassemblies
         Swerve             SWERVE{CHASSIS_LENGTH, CHASSIS_WIDTH};
         Intake             INTAKE{};
-        Climb              CLIMB{};
-
         // Robot controllers (operator and controller)
-        OperatorController O_CONTROLLER{&INTAKE, &CLIMB};
+        OperatorController O_CONTROLLER{&INTAKE};
         DriverController   D_CONTROLLER{&SWERVE};
 
         // Method to run autonomous commands
@@ -52,13 +50,4 @@ class Robot : public frc::TimedRobot
 
         // Telemetry things, adds data to Advantage Scope and Shuffleboard and take input for auto
         Telemetry          io{&SWERVE};
-
-        const std::string kAuto_Do_Nothing     = "Do Nothing";
-        const std::string kAuto_Move           = "Auto Move";
-        const std::string kAuto_Place_Amp_Red  = "Place Amp - Red";
-        const std::string kAuto_Place_Amp_Blue = "Place Amp - Blue";
-
-        // Sender for choosing the autonomous command.        
-        frc::SendableChooser<std::string> m_chooser;
-        std::string                       m_AutoCommandselected;
 };

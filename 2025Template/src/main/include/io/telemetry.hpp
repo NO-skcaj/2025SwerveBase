@@ -7,11 +7,14 @@
 #include <networktables/NetworkTableInstance.h>
 
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/smartdashboard/SendableChooser.h>
+
 #include <frc/shuffleboard/Shuffleboard.h>
 #include <frc/shuffleboard/ShuffleboardTab.h>
 #include <frc/shuffleboard/SimpleWidget.h>
 
 #include <frc/geometry/Pose2d.h>
+#include <frc/kinematics/SwerveModuleState.h>
 
 #include "../Constants.hpp"
 #include "../subsystems/Swerve.hpp"
@@ -49,20 +52,21 @@ class Telemetry
         //     inst.GetStructTopic(std::string_view("Position"))
         // ).Publish();
 
-        // StructArrayPublisher<SwerveModuleState> swervePublisher = AdvantageScope->GetStructArrayTopic<SwerveModuleState>(
-        //     NetworkTableInstance::GetDefault().GetStructArrayTopic(std::string_view("Swerve"))
-        // ).Publish();
+        StructArrayPublisher<frc::SwerveModuleState> publisher = NetworkTableInstance::GetDefault().GetStructArrayTopic<frc::SwerveModuleState>("/why/MyStates").Publish();
+        StructPublisher<frc::SwerveModuleState> publisher1 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State1").Publish();
+        StructPublisher<frc::SwerveModuleState> publisher2 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State2").Publish();
+        StructPublisher<frc::SwerveModuleState> publisher3 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State3").Publish();
+        StructPublisher<frc::SwerveModuleState> publisher4 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State4").Publish();
 
         // Shuffleboard data
-
-        // frc::ShuffleboardTab basicTab = frc::Shuffleboard::GetTab("Telemetry");
-
-        // // simple number, outputs the current heading of the robot; where its facing
-        // GenericEntry heading = frc::Shuffleboard::GetTab("Telemetry").Add("Heading", std::span<float>(this->m_swerve->navx.GetYaw())).GetEntry();
-
-        // // This auto updates... I think; outputs camera
-        // frc::Shuffleboard::GetTab("Telemetry").AddCamera(std::string_view("Cams"), std::span<std::string>("http://roboRIO-TEAM-frc.local:1181"));
-
         
+        const std::string kAuto_Do_Nothing     = "Do Nothing";
+        const std::string kAuto_Move           = "Auto Move";
+        const std::string kAuto_Score_Red  = "Place Amp - Red";
+        const std::string kAuto_Score_Blue = "Place Amp - Blue";
+
+        // Sender for choosing the autonomous command.        
+        frc::SendableChooser<std::string> m_chooser;
+        std::string                       m_AutoCommandselected;
 
 };
