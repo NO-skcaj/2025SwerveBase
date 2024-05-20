@@ -1,66 +1,42 @@
 #pragma once
 
-#include <frc/apriltag/AprilTagFieldLayout.h>
-#include <frc/apriltag/AprilTagFields.h>
-
+#include <frc/geometry/Rotation2d.h>
+#include <frc/geometry/Pose2d.h>
 #include <frc/geometry/Pose3d.h>
 #include <frc/geometry/Transform3d.h>
 
-#include <frc/smartdashboard/SmartDashboard.h>
+#include "frc/Timer.h"
 
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTable.h>
-#include <networktables/NetworkTableInstance.h>
+#include <frc/apriltag/AprilTagFieldLayout.h>
+#include <frc/apriltag/AprilTagFields.h>
 
 #include <photon/PhotonCamera.h>
 #include <photon/PhotonPoseEstimator.h>
-#include <photon/estimation/VisionEstimation.h>
-#include <photon/simulation/VisionSystemSim.h>
-#include <photon/simulation/VisionTargetSim.h>
-#include <photon/targeting/PhotonPipelineResult.h>
 
-#include <units/time.h>
+using namespace frc;
 
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <vector>
-
-
-std::shared_ptr<frc::AprilTagFieldLayout> Get2023Layout();
-
-struct VisionConfig 
+class Vision
 {
-  std::shared_ptr<photon::PhotonCamera>     camera;
-  frc::Transform3d                          robotToCamera;
-  units::radian_t                           fov;
-  std::shared_ptr<frc::AprilTagFieldLayout> layout;
-};
-
-class Vision 
-{
-    public:
-    Vision(VisionConfig *config);
-    ~Vision();
-
-    VisionConfig *GetConfig();
-
-    void OnStart();
-    void OnUpdate(units::second_t dt);
-
-    photon::PhotonPipelineResult                 GetLatestResult();
-    std::span<const photon::PhotonTrackedTarget> GetTargets();
-    photon::PhotonTrackedTarget                  GetBestTarget();
-    frc::Pose3d                                  GetPose();
-    frc::Transform3d                             GetPath(photon::PhotonTrackedTarget target);
-
-    protected:
-    private:
-    VisionConfig *_config;
-    std::vector<
-        std::pair<std::shared_ptr<photon::PhotonCamera>, frc::Transform3d>>
-        cameras = {std::make_pair(_config->camera, _config->robotToCamera)};
-    photon::PhotonPoseEstimator _estimator = photon::PhotonPoseEstimator{
-        Get2023Layout(), photon::CLOSEST_TO_REFERENCE_POSE, cameras};
-    std::shared_ptr<nt::NetworkTable> table =nt::NetworkTableInstance::GetDefault().GetTable("Vision");
+   private:
+      // Driver Camera
+      photon::PhotonCamera DriverCam("DriverCamera");
+      // Camera is mounted facing forward, half a meter forward of center, half a
+      // meter up from center.
+      Transform3d robotToDriverCam(Translation3d(0.5_m, 0_m, 0.5_m),
+                                        Rotation3d(0_rad, 0_rad, 0_rad));
+      
+      // ... Add other cameras here
+      // we likely wont use any other cameras for pose estimation
+   
+      // Assemble the list of cameras & mount locations
+      std::vector<
+          std::pair<photon::PhotonCamera, Transform3d> >
+          cameras;
+      cameras.push_back(std::make_pair(DriverCam, robotToDriverCam));
+      
+      photon::PhotonPoseEstimator camPoseEstimator{
+       aprilTagFieldLayout, photon::MULTI_TAG_PNP_ON_COPROCESSOR, std::move(cameras.at(0).first), cameras.at(0).second };
+   public:
+      /// @brief Gets the position from the camera looking at the apriltags, and the timestamp as a double
+      std::make_pair<Transform3d, double> GetEstimatedPosition();
 };
