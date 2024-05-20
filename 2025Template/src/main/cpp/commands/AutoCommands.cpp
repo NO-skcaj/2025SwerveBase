@@ -86,15 +86,13 @@ frc2::CommandPtr AutoCommands::getAutonomousCommand(Swerve *swerve, Intake *inta
   );
 
   frc2::CommandPtr swerveControllerCommand = frc2::SwerveControllerCommand<4>(
-    exampleTrajectory, [swerve]() { return swerve->m_odometry.GetPose(); },
-
+    exampleTrajectory, 
+    [swerve]() { return swerve->m_odometry.GetPose(); },
     swerve->m_driveKinematics,
-
     frc::PIDController{SWERVE_P, SWERVE_I, SWERVE_D},
     frc::PIDController{SWERVE_P, SWERVE_I, SWERVE_D},
     thetaController,
-
-    [swerve](auto moduleStates) {swerve->setModuleStates(moduleStates); },
+    [swerve](auto moduleStates) {swerve->setModuleStates(moduleStates); }, // std::array
 
     {swerve}
   ).ToPtr();

@@ -72,7 +72,7 @@
 
 // Swerve Constants
 #define DEADZONE_THRESHOLD                     0.1   // Raise to counter joystick drift this number is on a controller to controller basis
-#define MAX_SPEED_MPS                            4
+#define MAX_SPEED_MPS                            5
 #define MAX_ACCELERATION_MPS                     3
 #define MAX_TURNING_RPS                         90
 #define MAX_ACCELERATION_RPS                    45

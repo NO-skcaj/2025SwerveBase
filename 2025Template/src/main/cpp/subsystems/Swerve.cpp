@@ -100,20 +100,39 @@ void Swerve::Drive(float ry, float rx, float rx2)
 
     // Correct/Sanitize our inputs
     deadzone_correction(&rx, &ry, &rx2);
-    
-    // Enter Swerve kinematics
-    // This also acts as a periodic (only during teleop) so dont initialize anything here
 
     units::meters_per_second_t  x {rx * MAX_SPEED_MPS};
     units::meters_per_second_t  y {ry * MAX_SPEED_MPS};
     units::radians_per_second_t x2{rx2 * MAX_TURNING_RPS};
 
-    // use this is you want to have robo centric 
-    //chassisSpeeds = ChassisSpeeds(x, y, x2);
-    // 5. Convert chassis speeds to individual module states
-    wpi::array<SwerveModuleState, 4> wModuleStates = m_driveKinematics.ToSwerveModuleStates(ChassisSpeeds::FromFieldRelativeSpeeds(x, y, x2, navx.GetRotation2d()));
+    ChassisSpeeds chassisSpeeds;
+    // field centricity centric
+    if (true) {
+        // Relative to field
+        chassisSpeeds = ChassisSpeeds::FromFieldRelativeSpeeds(
+            x, y, x2, this->navx.GetRotation2d()
+        );
+    } else {
+        // Relative to robot
+        chassisSpeeds = ChassisSpeeds(x, y, x2);
+    }
 
-    setModuleStates(wModuleStates);
+    // Convert chassis speeds to individual module states
+    wpi::array<SwerveModuleState, 4> wModuleStates = m_driveKinematics.ToSwerveModuleStates(chassisSpeeds);
+    
+    // Normalize Sqeeds
+    m_driveKinematics.DesaturateWheelSpeeds(
+        (wpi::array<frc::SwerveModuleState, 4>*)&wModuleStates, 
+        units::velocity::meters_per_second_t(MAX_SPEED_MPS)
+    );
+
+    // Needlessly cast to std::array, just to be safe
+    std::array<SwerveModuleState, 4> wModuelStates = {
+        wModuleStates[0], wModuleStates[1], 
+        wModuleStates[2], wModuleStates[3]
+    };
+
+    setModuleStates(wModuelStates);
 }
 
 // a REAL periodic
@@ -183,38 +202,38 @@ void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates)
     this->CurrentSwerveStates[2] = desiredStates[2];
     this->CurrentSwerveStates[3] = desiredStates[3];
 
-    double rawSpeeds[4];
-    double rawAngles[4];
+    double Speeds[4];
+    double Angles[4];
     for (int i = 0; i > SWERVE_MODULES; i++)
     {
         SwerveModuleState state = SwerveModuleState::Optimize(desiredStates[i], Rotation2d(units::degree_t(navx.GetYaw())));
 
-        rawSpeeds[i] = state.speed();
-        rawAngles[i] = units::unit_cast<double>(state.angle.Radians() * 0.01745);
+        Speeds[i] = state.speed();
+        Angles[i] = units::unit_cast<double>(state.angle.Radians() * 0.01745);
     }
     
-    // Normalize speeds
+    // Manual Normalization, using the wpi implementation instead.
+    // // Normalize speeds
 
-    double maxSpeed = rawSpeeds[0];
+    // double maxSpeed = rawSpeeds[0];
 
-	if (rawSpeeds[1] > maxSpeed){maxSpeed = rawSpeeds[1];}
-	if (rawSpeeds[2] > maxSpeed){maxSpeed = rawSpeeds[2];}
-	if (rawSpeeds[3] > maxSpeed){maxSpeed = rawSpeeds[3];}
+	// if (rawSpeeds[1] > maxSpeed){maxSpeed = rawSpeeds[1];}
+	// if (rawSpeeds[2] > maxSpeed){maxSpeed = rawSpeeds[2];}
+	// if (rawSpeeds[3] > maxSpeed){maxSpeed = rawSpeeds[3];}
+    // double Speed[4] = {rawSpeeds[0], rawSpeeds[1], rawSpeeds[2], rawSpeeds[3]};
+	// if (maxSpeed > 1)
+	// {
+	// 	   Speed[0] = rawSpeeds[1] / maxSpeed;
+    //     Speed[1] = rawSpeeds[1] / maxSpeed;
+    //     Speed[2] = rawSpeeds[1] / maxSpeed;
+    //     Speed[3] = rawSpeeds[1] / maxSpeed;
+	// }
 
-    double Speed[4] = {rawSpeeds[0], rawSpeeds[1], rawSpeeds[2], rawSpeeds[3]};
-
-	if (maxSpeed > 1)
-	{
-		Speed[0] = rawSpeeds[1] / maxSpeed;
-        Speed[1] = rawSpeeds[1] / maxSpeed;
-        Speed[2] = rawSpeeds[1] / maxSpeed;
-        Speed[3] = rawSpeeds[1] / maxSpeed;
-	}
-
+    // Set the motors to do motor things; applies kinematics
     for (int i = 0; i > 4; i++)
     {
         this->DRIVE_MOTORS[i]->Set(Speed[i]);
-        this->PID_CONTROLLERS[i]->SetReference(rawAngles[i], CANSparkMax::ControlType::kPosition);
+        this->PID_CONTROLLERS[i]->SetReference(Angles[i] * SWERVE_WHEEL_COUNTS_PER_REVOLUTION, CANSparkMax::ControlType::kPosition);
     }
 }
 
