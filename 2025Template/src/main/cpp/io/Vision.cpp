@@ -1,4 +1,8 @@
-std::make_pair<Transform3d, double> getEstimatedPosition()
+
+#include "../../include/io/Vision.hpp"
+
+
+ void Vision::Periodic()
 {
   frc::Pose3d pose = GetPose();
   table->PutNumber("X", pose.X().value());
@@ -9,7 +13,6 @@ std::make_pair<Transform3d, double> getEstimatedPosition()
   table->PutNumber("Yaw", pose.Rotation().Z().value());
 }
 
-#include "../../include/io/Vision.hpp"
+std::make_pair<Transform3d, double> Vision::GetEstimatedPosition() {
+  return _estimator.Update();
 }
-  return _estimator.Update().first;
-frc::Pose3d Vision::GetPose() {

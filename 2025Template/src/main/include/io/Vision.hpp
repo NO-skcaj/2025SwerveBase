@@ -18,25 +18,25 @@ using namespace frc;
 class Vision
 {
    private:
-      // Driver Camera
-      photon::PhotonCamera DriverCam("DriverCamera");
-      // Camera is mounted facing forward, half a meter forward of center, half a
-      // meter up from center.
-      Transform3d robotToDriverCam(Translation3d(0.5_m, 0_m, 0.5_m),
-                                        Rotation3d(0_rad, 0_rad, 0_rad));
-      
-      // ... Add other cameras here
-      // we likely wont use any other cameras for pose estimation
-   
-      // Assemble the list of cameras & mount locations
-      std::vector<
-          std::pair<photon::PhotonCamera, Transform3d> >
-          cameras;
-      cameras.push_back(std::make_pair(DriverCam, robotToDriverCam));
-      
-      photon::PhotonPoseEstimator camPoseEstimator{
-       aprilTagFieldLayout, photon::MULTI_TAG_PNP_ON_COPROCESSOR, std::move(cameras.at(0).first), cameras.at(0).second };
+        // Driver Camera
+        photon::PhotonCamera DriverCam = photon::PhotonCamera("DriverCamera");
+        // Camera is mounted facing forward, half a meter forward of center, half a
+        // meter up from center.
+        Transform3d robotToDriverCam = Transform3d(Translation3d(0.5_m, 0_m, 0.5_m),
+                                                   Rotation3d(0_rad, 0_rad, 0_rad));
+
+        // ... Add other cameras here
+        // we likely wont use any other cameras for pose estimation
+
+        photon::PhotonPoseEstimator camPoseEstimator{
+        frc::AprilTagFieldLayout, photon::MULTI_TAG_PNP_ON_COPROCESSOR, DriverCam, robotToDriverCam};
    public:
-      /// @brief Gets the position from the camera looking at the apriltags, and the timestamp as a double
-      std::make_pair<Transform3d, double> GetEstimatedPosition();
+
+        /// @brief Sets telemetry
+        void Periodic();
+
+        /// @brief Gets the position from the camera looking at the apriltags, and the timestamp as a double
+        std::make_pair<Transform3d, double> GetEstimatedPosition();
+
+        /// @brief 
 };
