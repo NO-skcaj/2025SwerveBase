@@ -21,6 +21,8 @@
 #include <networktables/StructTopic.h>
 
 #include <frc/geometry/Pose2d.h>
+#include <frc/geometry/Pose3d.h>
+
 #include <frc/kinematics/SwerveModuleState.h>
 
 #include "../Constants.hpp"
@@ -50,6 +52,8 @@ class Telemetry
         /// @brief needed for field visualization
         frc::Field2d m_field;
 
+        frc::Pose3d RobotPose = frc::Pose3d();
+
         /// @brief initializes NetworkTables
         // NetworkTableInstance inst = NetworkTableInstance::GetDefault();
         /// @brief this is where you can publish data specifically for Advantage Scope
@@ -63,6 +67,7 @@ class Telemetry
         //     inst.GetStructTopic(std::string_view("Position"))
         // ).Publish();
 
+        // most if not all of these arent needed, its meant to be used by AdvantageScope
         StructArrayPublisher<frc::SwerveModuleState> publisher  = NetworkTableInstance::GetDefault().GetStructArrayTopic<frc::SwerveModuleState>("/why/MyStates").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher1 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State1").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher2 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State2").Publish();
@@ -71,8 +76,8 @@ class Telemetry
 
         // Shuffleboard data
         
-        const std::string kAuto_Do_Nothing     = "Do Nothing";
-        const std::string kAuto_Move           = "Auto Move";
+        const std::string kAuto_Do_Nothing = "Do Nothing";
+        const std::string kAuto_Move       = "Auto Move";
         const std::string kAuto_Score_Red  = "Place Amp - Red";
         const std::string kAuto_Score_Blue = "Place Amp - Blue";
 

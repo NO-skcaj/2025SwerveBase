@@ -10,6 +10,8 @@ Telemetry::Telemetry(Swerve *swerve)
     // Remember the swerve pointer
     this->m_swerve = swerve;
 
+    vision.VisionInit();
+
     m_chooser.SetDefaultOption(kAuto_Do_Nothing,  kAuto_Do_Nothing);
     m_chooser.AddOption(kAuto_Move,               kAuto_Move);
     m_chooser.AddOption(kAuto_Do_Nothing,         kAuto_Do_Nothing);
@@ -56,8 +58,14 @@ void Telemetry::Robot_Periodic()
     SmartDashboard::PutData("Swerve Drive", (wpi::Sendable*)&swerveData);
 
     // Camera stuff; outputting estimated pose
-    auto RobotPose = vision.GetEstimated().first;
+    auto maybePose = vision.GetEstimatedGlobalPose();
+    if (maybePose.has_value())
+    {
+        RobotPose = maybePose.value().estimatedPose;
+    } else {
+        RobotPose = frc::Pose3d();
+    }
 
     // Do this in either robot periodic or subsystem periodic
-    m_field.SetRobotPose(frc::Pose2d(RobotPose.X, RobotPose.Y, RobotPose.Rotation()));
+    m_field.SetRobotPose(frc::Pose2d(RobotPose.X(), RobotPose.Y(), RobotPose.Rotation().ToRotation2d()));
 }

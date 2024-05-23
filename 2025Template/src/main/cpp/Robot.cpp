@@ -13,7 +13,7 @@ using namespace frc;
 /// @brief Called when the robot is started.
 void Robot::RobotInit()
 {
-    io.VisionInit();
+    // io.VisionInit();
 }
 
 // This function is called every 20 ms, no matter the mode. Use
@@ -89,7 +89,7 @@ void Robot::SimulationInit()
     // Set the wheels to absolute position
     SWERVE.Snap_Wheels_To_Absolute_Position();
 
-    io.VisionInit();
+    // io.VisionInit();
 
 }
 

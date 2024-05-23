@@ -5,6 +5,8 @@
 #include <frc/geometry/Pose3d.h>
 #include <frc/geometry/Transform3d.h>
 
+#include <frc/RobotBase.h>
+
 #include <thread>
 
 #include <cameraserver/CameraServer.h>
@@ -15,32 +17,50 @@
 
 #include <photon/PhotonCamera.h>
 #include <photon/PhotonPoseEstimator.h>
+#include <photon/estimation/VisionEstimation.h>
+#include <photon/simulation/VisionSystemSim.h>
+#include <photon/simulation/VisionTargetSim.h>
+#include <photon/targeting/PhotonPipelineResult.h>
+
+#include <limits>
+#include <memory>
 
 using namespace frc;
 
-class Vision
-{
-   private:
-     // Driver Camera
-     photon::PhotonCamera DriverCam = photon::PhotonCamera("DriverCamera");
-     // Camera is mounted facing forward, half a meter forward of center, half a
-     // meter up from center.
-     Transform3d robotToDriverCam = Transform3d(Translation3d(0.5_m, 0_m, 0.5_m),
-                                                  Rotation3d(0_rad, 0_rad, 0_rad));
-     // ... Add other cameras here
-     // we likely wont use any other cameras for pose estimation
 
-     photon::PhotonPoseEstimator DriverCamEstimator{
-     frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo), photon::MULTI_TAG_PNP_ON_COPROCESSOR, std::move(DriverCam), robotToDriverCam};
-  
-   public:
+class Vision {
+     public:
+          Vision();
 
-     /// @brief Starts the camera
-     Vision();
+          /// @brief the actual Pose3d is a property (GetEstimatedGlobalPose().value_or(frc::Pose3d()).estimatedPose)
+          std::optional<photon::EstimatedRobotPose> GetEstimatedGlobalPose();
+          
+          static void VisionInit();
+     private:
+          
 
-     /// @brief Gets the position from the camera looking at the apriltags, and the timestamp as a double
-     frc::Pose3d GetPosition();
+          photon::PhotonPipelineResult GetLatestResult();
 
-     /// @brief Starts vision and outputs it to shuffleboard
-     static void VisionInit();
+          frc::Field2d& GetSimDebugField();
+
+          void SimPeriodic(frc::Pose2d robotSimPose);
+
+          void ResetSimPose(frc::Pose2d pose);
+
+          Eigen::Matrix<double, 3, 1> GetEstimationStdDevs(frc::Pose2d estimatedPose);
+
+          photon::PhotonPoseEstimator photonEstimator{
+          frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
+          photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+          photon::PhotonCamera{"photonvision"}, frc::Transform3d{frc::Translation3d{0.5_m, 0.0_m, 0.5_m}, frc::Rotation3d{0_rad, 0_rad, 0_rad}}
+          };
+
+          std::shared_ptr<photon::PhotonCamera> camera{photonEstimator.GetCamera()};
+
+          /// @brief sim stuff
+          std::unique_ptr<photon::VisionSystemSim>     visionSim;
+          std::unique_ptr<photon::SimCameraProperties> cameraProp;
+          std::shared_ptr<photon::PhotonCameraSim>     cameraSim;
+
+          units::second_t lastEstTimestamp{0_s};
 };

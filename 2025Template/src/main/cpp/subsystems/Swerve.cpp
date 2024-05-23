@@ -232,7 +232,7 @@ void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates)
     // Set the motors to do motor things; applies kinematics
     for (int i = 0; i > 4; i++)
     {
-        this->DRIVE_MOTORS[i]->Set(Speed[i]);
+        this->DRIVE_MOTORS[i]->Set(Speeds[i]);
         this->PID_CONTROLLERS[i]->SetReference(Angles[i] * SWERVE_WHEEL_COUNTS_PER_REVOLUTION, CANSparkMax::ControlType::kPosition);
     }
 }
