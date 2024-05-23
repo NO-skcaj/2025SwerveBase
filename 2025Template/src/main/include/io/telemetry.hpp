@@ -8,16 +8,25 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/smartdashboard/SendableChooser.h>
+#include <frc/smartdashboard/Field2d.h>
 
 #include <frc/shuffleboard/Shuffleboard.h>
 #include <frc/shuffleboard/ShuffleboardTab.h>
 #include <frc/shuffleboard/SimpleWidget.h>
+
+#include <wpi/sendable/Sendable.h>
+#include <wpi/sendable/SendableBuilder.h>
+
+#include <networktables/GenericEntry.h>
+#include <networktables/StructTopic.h>
 
 #include <frc/geometry/Pose2d.h>
 #include <frc/kinematics/SwerveModuleState.h>
 
 #include "../Constants.hpp"
 #include "../subsystems/Swerve.hpp"
+#include "../../include/io/TelemetryTypes.hpp"
+#include "../../include/io/Vision.hpp"
 
 using namespace nt;
 
@@ -31,13 +40,15 @@ class Telemetry
         /// @brief Method called periodically every dirver/operator control packet.
         void Robot_Periodic();
 
-        /// @brief Starts vision and outputs it to shuffleboard
-        static void VisionInit();
-
     private:
         
         /// @brief Pointer to the swerver drive class.
         Swerve *m_swerve;
+
+        Vision vision;
+
+        /// @brief needed for field visualization
+        frc::Field2d m_field;
 
         /// @brief initializes NetworkTables
         // NetworkTableInstance inst = NetworkTableInstance::GetDefault();
@@ -52,11 +63,11 @@ class Telemetry
         //     inst.GetStructTopic(std::string_view("Position"))
         // ).Publish();
 
-        StructArrayPublisher<frc::SwerveModuleState> publisher = NetworkTableInstance::GetDefault().GetStructArrayTopic<frc::SwerveModuleState>("/why/MyStates").Publish();
-        StructPublisher<frc::SwerveModuleState> publisher1 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State1").Publish();
-        StructPublisher<frc::SwerveModuleState> publisher2 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State2").Publish();
-        StructPublisher<frc::SwerveModuleState> publisher3 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State3").Publish();
-        StructPublisher<frc::SwerveModuleState> publisher4 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State4").Publish();
+        StructArrayPublisher<frc::SwerveModuleState> publisher  = NetworkTableInstance::GetDefault().GetStructArrayTopic<frc::SwerveModuleState>("/why/MyStates").Publish();
+        StructPublisher<frc::SwerveModuleState>      publisher1 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State1").Publish();
+        StructPublisher<frc::SwerveModuleState>      publisher2 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State2").Publish();
+        StructPublisher<frc::SwerveModuleState>      publisher3 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State3").Publish();
+        StructPublisher<frc::SwerveModuleState>      publisher4 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State4").Publish();
 
         // Shuffleboard data
         
