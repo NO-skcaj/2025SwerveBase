@@ -26,7 +26,7 @@
 #include <memory>
 
 #include "../../include/subsystems/Swerve.hpp"
-#include "../../include/io/LimeLightHelper.h" 
+#include "../../include/telemetry/LimeLightHelper.h" 
 
 using namespace frc;
 
@@ -35,10 +35,14 @@ class Vision {
      public:
           Vision();
 
-          void 
+          void PoseEstimationPeriodic(Swerve *Gettin_The_ULTIMATE_POSE_ESTIMATOR, bool team);
           
           static void VisionInit();
+
+          frc::Pose2d currentPose;
      private:
+
+          Swerve* m_swerve;
                     
           LimelightHelpers::PoseEstimate bmt2 = LimelightHelpers::getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
           LimelightHelpers::PoseEstimate rmt2 = LimelightHelpers::getBotPoseEstimate_wpiRed_MegaTag2("limelight");

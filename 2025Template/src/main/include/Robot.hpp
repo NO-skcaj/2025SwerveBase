@@ -13,11 +13,11 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "../include/commands/OperatorController.hpp"
-#include "../include/commands/DriverController.hpp"
+#include "../include/io/OperatorController.hpp"
+#include "../include/io/DriverController.hpp"
 #include "../include/commands/AutoCommands.hpp"
 
-#include "../include/io/Telemetry.hpp"
+#include "../include/telemetry/Telemetry.hpp"
 
 
 

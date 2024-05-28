@@ -1,5 +1,5 @@
 
-#include "../../include/io/Vision.hpp"
+#include "../../include/telemetry/Vision.hpp"
 
 void Vision::VisionInit() 
 {
@@ -39,18 +39,24 @@ void Vision::VisionInit()
     }
 }
 
-Vision::Vision(Swerve *Gettin_The_ULTIMATE_POSE_ESTIMATOR) 
+Vision::Vision() 
 {
   std::thread VisionThread(&VisionInit);
   VisionThread.detach();
 
+}
+
+void Vision::PoseEstimationPeriodic(Swerve *Gettin_The_ULTIMATE_POSE_ESTIMATOR, bool team)
+{
   bool doRejectUpdate = false;
 
   LimelightHelpers::SetRobotOrientation("limelight", Gettin_The_ULTIMATE_POSE_ESTIMATOR.Ulitmate_Pose_Estimation.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
-  
-  LimelightHelpers::PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-
+  if (team) {
+    LimelightHelpers::PoseEstimate mt2 = bmt2;
+  } else {
+    LimelightHelpers::PoseEstimate mt2 = rmt2;
+  }
 
   if(Math.abs(m_gyro.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
   {
@@ -67,14 +73,6 @@ Vision::Vision(Swerve *Gettin_The_ULTIMATE_POSE_ESTIMATOR)
       mt2.pose,
       mt2.timestampSeconds
     );
-
-    // This code will be probably in the main swerve code within the update odometry thing along with the poseEstimator
+    this->currentPose = mt2.pose
   }
-
-
-}
-
-void Vision::PoseEstimationPeriodic()
-{
-
 }

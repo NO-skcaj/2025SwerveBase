@@ -27,15 +27,15 @@
 
 #include "../Constants.hpp"
 #include "../subsystems/Swerve.hpp"
-#include "../../include/io/TelemetryTypes.hpp"
-#include "../../include/io/Vision.hpp"
+#include "../../include/telemetry/TelemetryTypes.hpp"
+#include "../../include/telemetry/Vision.hpp"
 
 using namespace nt;
 
 class Telemetry
 {
     public:
-        /// @brief Constructor for the DriverController class.
+        /// @brief Constructor for the Telemetry class.
         /// @param swerve - Pointer to the swerve drive class.
         Telemetry(Swerve *swerve);
 
@@ -47,7 +47,7 @@ class Telemetry
         /// @brief Pointer to the swerver drive class.
         Swerve *m_swerve;
 
-        Vision vision;
+        Vision m_vision = Vision();
 
         /// @brief needed for field visualization
         frc::Field2d m_field;
@@ -81,8 +81,16 @@ class Telemetry
         const std::string kAuto_Score_Red  = "Place Amp - Red";
         const std::string kAuto_Score_Blue = "Place Amp - Blue";
 
+        const std::string kRed  = "Red";
+        const std::string kBlue = "Blue";
+
         // Sender for choosing the autonomous command.        
         frc::SendableChooser<std::string> m_chooser;
         std::string                       m_AutoCommandselected;
+
+        
+        // Sender for choosing the autonomous command.        
+        frc::SendableChooser<std::string> m_team_chooser;
+        std::string                       teamChosen;
 
 };

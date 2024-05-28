@@ -1,11 +1,11 @@
 
-#include "../../include/io/Telemetry.hpp"
+#include "../../include/telemetry/Telemetry.hpp"
 
 using namespace nt;
 
  /// @brief Constructor for the Telemetry class.
  /// @param swerve - Pointer to the swerve drive class.
-Telemetry::Telemetry(Swerve *swerve)
+Telemetry::Telemetry(Swerve *swerve, bool team)
 {
     // Remember the swerve pointer
     this->m_swerve = swerve;
@@ -15,6 +15,12 @@ Telemetry::Telemetry(Swerve *swerve)
     m_chooser.SetDefaultOption(kAuto_Do_Nothing,  kAuto_Do_Nothing);
     m_chooser.AddOption(kAuto_Move,               kAuto_Move);
     m_chooser.AddOption(kAuto_Do_Nothing,         kAuto_Do_Nothing);
+
+    SmartDashboard::PutData("Auto Modes", &m_chooser);
+
+    m_chooser.SetDefaultOption(kRed, kRed);
+    m_chooser.AddOption(kRed,        kRed);
+    m_chooser.AddOption(kBlue,       kBlue);
 
     SmartDashboard::PutData("Auto Modes", &m_chooser);
     
@@ -63,6 +69,8 @@ void Telemetry::Robot_Periodic()
     // I HAD ALL OF THIS FOR PHOTON VISION
     // AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
+    RobotPose = this->m_vision.currentPose;
+
     // Do this in either robot periodic or subsystem periodic
-    m_field.SetRobotPose(frc::Pose2d(RobotPose.X(), RobotPose.Y(), RobotPose.Rotation().ToRotation2d()));
+    m_field.SetRobotPose(RobotPose);
 }

@@ -13,7 +13,7 @@ using namespace frc;
 /// @brief Called when the robot is started.
 void Robot::RobotInit()
 {
-    // io.VisionInit();
+    io.VisionInit();
 }
 
 // This function is called every 20 ms, no matter the mode. Use
