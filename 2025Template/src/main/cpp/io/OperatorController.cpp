@@ -1,6 +1,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
-#include "../../include/commands/OperatorController.hpp"
+#include "../../include/io/OperatorController.hpp"
 
 /// @brief Constructor for the OperatorController class.
 /// @param intake - Pointer to the intake class to allow calling intake methods.

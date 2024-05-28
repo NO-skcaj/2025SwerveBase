@@ -58,13 +58,10 @@ void Telemetry::Robot_Periodic()
     SmartDashboard::PutData("Swerve Drive", (wpi::Sendable*)&swerveData);
 
     // Camera stuff; outputting estimated pose
-    auto maybePose = vision.GetEstimatedGlobalPose();
-    if (maybePose.has_value())
-    {
-        RobotPose = maybePose.value().estimatedPose;
-    } else {
-        RobotPose = frc::Pose3d();
-    }
+    auto maybePose = frc::Pose3d();
+
+    // I HAD ALL OF THIS FOR PHOTON VISION
+    // AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
     // Do this in either robot periodic or subsystem periodic
     m_field.SetRobotPose(frc::Pose2d(RobotPose.X(), RobotPose.Y(), RobotPose.Rotation().ToRotation2d()));

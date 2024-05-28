@@ -7,12 +7,13 @@
 #include <frc2/command/SubsystemBase.h>
 
 #include <frc/kinematics/SwerveDriveKinematics.h>
-#include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/kinematics/SwerveModuleState.h>
 
 #include <frc/geometry/Translation2d.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Pose2d.h>
+
+#include <frc/estimator/SwerveDrivePoseEstimator.h>
 
 #include <frc/controller/PIDController.h>
 
@@ -49,24 +50,15 @@ class Swerve : public frc2::SubsystemBase
 
         // Used for FRC lib
 
-        // Creating my odometry object from the kinematics object. Here,
-        // our starting pose is 5 meters along the long end of the field and in the
-        // center of the field along the short end, facing forward.
-
         units::radian_t initGyro{0};
         Rotation2d wpiinitGyro = Rotation2d(initGyro);
         // btw SwerveModulePosition is an frc class aka this is intended
         SwerveModulePosition defaultSwervePos{0_m, wpiinitGyro};
-
-        SwerveDriveOdometry<4> m_odometry{
-            m_driveKinematics,
-            wpiinitGyro,
-            {
-                defaultSwervePos,
-                defaultSwervePos,
-                defaultSwervePos,
-                defaultSwervePos,
-            },
+        
+        SwerveDrivePoseEstimator Ulitmate_Pose_Estimation{
+            m_driveKinematics, 
+            wpiinitGyro, 
+            CurrentSwerveStates, 
             Pose2d(),
         };
 

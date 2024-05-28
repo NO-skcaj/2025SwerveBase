@@ -1,6 +1,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
-#include "../../include/commands/DriverController.hpp"
+#include "../../include/io/DriverController.hpp"
 
  /// @brief Constructor for the DriverController class.
  /// @param swerve - Pointer to the swerve drive class.

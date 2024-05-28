@@ -2,7 +2,6 @@
 
 #include <frc/kinematics/SwerveModuleState.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
-#include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/ChassisSpeeds.h>
 
@@ -165,9 +164,7 @@ void Swerve::updateOdometry(float gyroInput)
     wpi::array<SwerveModulePosition, 4> CurrentPositions(fr ,fl, br, bl);
 
     // Update the pose
-    this->m_odometry.Update(gyroAngle, CurrentPositions);
-
-    this->CurrentPose = this->m_odometry.GetPose();
+    this->CurrentPose = this->Ulitmate_Pose_Estimation.Update(gyroAngle, CurrentPositions);
 }
 
 void Swerve::resetOdometry(Pose2d pose)
@@ -191,7 +188,7 @@ void Swerve::resetOdometry(Pose2d pose)
 
     wpi::array<SwerveModulePosition, 4> CurrentPositions(fr ,fl, br, bl);
 
-    m_odometry.ResetPosition(navx.GetRotation2d(), CurrentPositions, pose);
+    this->Ulitmate_Pose_Estimation.ResetPosition(navx.GetRotation2d(), CurrentPositions, pose);
 }
 
 void Swerve::setModuleStates(std::array<SwerveModuleState, 4> desiredStates) 
