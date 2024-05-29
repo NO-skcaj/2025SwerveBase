@@ -49,5 +49,5 @@ class Robot : public frc::TimedRobot
         AutoCommands       Autonomous{};
 
         // Telemetry things, adds data to Advantage Scope and Shuffleboard and take input for auto
-        Telemetry          io{&SWERVE};
+        Telemetry*         io;
 };

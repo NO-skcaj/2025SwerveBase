@@ -50,17 +50,16 @@ class Swerve : public frc2::SubsystemBase
 
         // Used for FRC lib
 
-        units::radian_t initGyro{0};
-        Rotation2d wpiinitGyro = Rotation2d(initGyro);
+        Rotation2d wpiinitGyro = Rotation2d();
         // btw SwerveModulePosition is an frc class aka this is intended
         SwerveModulePosition defaultSwervePos{0_m, wpiinitGyro};
         
-        SwerveDrivePoseEstimator Ulitmate_Pose_Estimation{
-            m_driveKinematics, 
-            wpiinitGyro, 
-            CurrentSwerveStates, 
-            Pose2d(),
-        };
+        SwerveDrivePoseEstimator<4> Ulitmate_Pose_Estimation = SwerveDrivePoseEstimator<4>(
+            (SwerveDriveKinematics<4>&) 	m_driveKinematics,
+            (const Rotation2d &) wpiinitGyro,
+            (const wpi::array<SwerveModulePosition,4> &) 	CurrentSwerveStates,
+            (const Pose2d &) CurrentPose
+        );
 
         /// @brief Constructor for the Swerve class.
         /// @param length - The length of the robot.

@@ -13,7 +13,8 @@ using namespace frc;
 /// @brief Called when the robot is started.
 void Robot::RobotInit()
 {
-    io.VisionInit();
+    // Call the Telemetry constuctor
+    io = Telemetry(*this->SWERVE);
 }
 
 // This function is called every 20 ms, no matter the mode. Use
@@ -25,7 +26,7 @@ void Robot::RobotInit()
 void Robot::RobotPeriodic()
 { 
     // SWERVE.updateOdometry(SWERVE.navx.GetYaw());
-    io.Robot_Periodic();
+    io->Robot_Periodic();
 }
 
 // This autonomous (along with the chooser code above) shows how to select

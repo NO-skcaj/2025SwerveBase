@@ -33,11 +33,11 @@ using namespace frc;
 
 class Vision {
      public:
-          Vision();
+          static void Camera();
 
           void PoseEstimationPeriodic(Swerve *Gettin_The_ULTIMATE_POSE_ESTIMATOR, bool team);
           
-          static void VisionInit();
+          void VisionInit();
 
           frc::Pose2d currentPose;
      private:

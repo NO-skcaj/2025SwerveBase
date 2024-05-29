@@ -37,7 +37,7 @@ class Telemetry
     public:
         /// @brief Constructor for the Telemetry class.
         /// @param swerve - Pointer to the swerve drive class.
-        Telemetry(Swerve *swerve);
+        Telemetry(Swerve *swerve, bool team);
 
         /// @brief Method called periodically every dirver/operator control packet.
         void Robot_Periodic();
@@ -47,12 +47,12 @@ class Telemetry
         /// @brief Pointer to the swerver drive class.
         Swerve *m_swerve;
 
-        Vision m_vision = Vision();
+        Vision m_vision;
 
         /// @brief needed for field visualization
         frc::Field2d m_field;
 
-        frc::Pose3d RobotPose = frc::Pose3d();
+        frc::Pose2d RobotPose = frc::Pose2d();
 
         /// @brief initializes NetworkTables
         // NetworkTableInstance inst = NetworkTableInstance::GetDefault();
@@ -66,13 +66,14 @@ class Telemetry
         // StructPublisher<Pose2d> posePublisher = AdvantageScope->GetStructTopic<Pose2d>(
         //     inst.GetStructTopic(std::string_view("Position"))
         // ).Publish();
-
         // most if not all of these arent needed, its meant to be used by AdvantageScope
+
         StructArrayPublisher<frc::SwerveModuleState> publisher  = NetworkTableInstance::GetDefault().GetStructArrayTopic<frc::SwerveModuleState>("/why/MyStates").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher1 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State1").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher2 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State2").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher3 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State3").Publish();
         StructPublisher<frc::SwerveModuleState>      publisher4 = NetworkTableInstance::GetDefault().GetStructTopic<frc::SwerveModuleState>("/why/MyStates/State4").Publish();
+    
 
         // Shuffleboard data
         
